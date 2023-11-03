@@ -31,7 +31,7 @@ app.use(cors(corsOptions));
 
 app.get('/', async (req, res) => {
     try {
-        const query = 'SELECT * FROM PRODUCTO;'; // Reemplaza 'nombre_de_la_tabla' con el nombre de la tabla en tu base de datos.
+        const query = 'SELECT * FROM HistoricoPrecio;'; // Reemplaza 'nombre_de_la_tabla' con el nombre de la tabla en tu base de datos.
         const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
         res.json(result);
     } catch (error) {
