@@ -29,9 +29,9 @@ app.use(cors(corsOptions));
 
 //app.use(express.json());
 
-app.get('/', async (req, res) => {
+app.get('/api/obtenercargos', async (req, res) => {
     try {
-        const query = 'SELECT * FROM HistoricoPrecio;'; // Reemplaza 'nombre_de_la_tabla' con el nombre de la tabla en tu base de datos.
+        const query = 'SELECT codCargo, nomCargo FROM Cargo;';
         const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
         res.json(result);
     } catch (error) {
@@ -39,6 +39,29 @@ app.get('/', async (req, res) => {
         res.status(500).json({ error: 'Error en la consulta SELECT' });
     }
 });
+
+app.post('/api/verificarlogin', async (req, res) => {
+    try {
+      const { CODEMPLEADO, CODCARGO } = req.body;     
+      const query= `SELECT COUNT(codEmpleado) COUNT FROM emplcargo where codEmpleado = :CODEMPLEADO AND codCargo = :CODCARGO ;`
+      const result = await db.sequelize.query(query, {
+        replacements: {
+          CODEMPLEADO,
+          CODCARGO,
+        },
+        type: db.sequelize.QueryTypes.SELECT,
+      });
+  
+      // Si count es mayor que 0, significa que ya existe una combinación en la base de datos      
+      const exists = result[0].COUNT > 0;  
+      res.json({ exists });
+    } catch (error) {
+      console.error('Error al verificar el registro:', error);
+      res.status(500).json({ error: 'Error en el servidor' });
+    }
+  });
+
+/*-------------------------------------------------------------------------------------------------------*/
 
 
 app.get('/api/obtenerDatos', async (req, res) => {
