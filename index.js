@@ -94,6 +94,84 @@ app.get('/api/obtenertipopersona', async (req, res) => {
   }
 });
 /*-------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------NOMENCLATURAS------------------------------------------------*/
+app.get('/api/obtenertipovia', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=1 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipocuadrante', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=6 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipobarrio', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=13 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipourbanizacion', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=17 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipomanzana', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=15 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipopredio', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=19 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipocomplemento', async (req, res) => {
+  try {
+      const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=21 ;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+/*-------------------------------------------------------------------------------------------------------*/
 
 
 app.get('/api/obtenerDatos', async (req, res) => {
