@@ -61,6 +61,38 @@ app.post('/api/verificarlogin', async (req, res) => {
     }
   });
 
+app.get('/api/obtenertipodoc', async (req, res) => {
+    try {
+        const query = 'SELECT idTipoDoc, descTipoDoc FROM TipoDoc;';
+        const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+        res.json(result);
+    } catch (error) {
+        console.error(`Error en la consulta SELECT: ${error}`);
+        res.status(500).json({ error: 'Error en la consulta SELECT' });
+    }
+});
+
+app.get('/api/obtenertipocontact', async (req, res) => {
+  try {
+      const query = 'SELECT idTipoContacto, descTipoContacto FROM TipoContacto;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.get('/api/obtenertipopersona', async (req, res) => {
+  try {
+      const query = 'SELECT idTipoPersona, DescTipoPersona FROM TipoPersona;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
 /*-------------------------------------------------------------------------------------------------------*/
 
 
