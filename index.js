@@ -282,7 +282,31 @@ app.post('/api/insertardireccion', async (req, res) => {
 
 
 /*-------------------------------------------------------------------------------------------------------*/
- 
+ /*------------------------------------Factura busquedas y registros--------------------------------------------------------*/
+ app.post('/api/buscarpersona', async (req, res) => {
+  try{   
+      const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO} = req.body;             
+      const query = `SELECT NOMBRE, APELLIDO FROM PERSONA WHERE IDTIPOPERSONA = :IDTIPOPERSONA AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO;`;
+      const result = await db.sequelize.query(query, {
+          replacements: {
+            IDTIPOPERSONA,
+            IDTIPODOC,
+            NDOCUMENTO                
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        });      
+        
+        if(result.length===0){
+          res.json({NOMBRE: '', APELLIDO:''})
+        }else
+          res.json(result);
+  }catch(error){
+      console.error('Error al BUSCAR persona en la base de datos: ' + error);
+      res.data.status(500).json('Wronggg en buscar persona');
+  }  
+});
+
+/*-------------------------------------------------------------------------------------------------------*/
 
 /*db.sequelize
 .sync({force:true})
