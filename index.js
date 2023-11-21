@@ -172,11 +172,11 @@ app.get('/api/obtenertipocomplemento', async (req, res) => {
   }
 });
 
-app.get('/api/obtenerregistroscontacto', async (req, res) => {
+app.get('/api/obtenerregistrosdireccion', async (req, res) => {
   try {
-      const query = 'SELECT COUNT(CONSECCONTACTO) NUMCONTACT FROM CONTACTO;';
+      const query = 'SELECT DISTINCT idDireccion NUMDIRECC FROM DIRECCION;';
       const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
-      res.json(result[0].NUMCONTACT);
+      res.json(result[0].NUMDIRECC);
   } catch (error) {
       console.error(`Error en la consulta SELECT: ${error}`);
       res.status(500).json({ error: 'Error en la consulta SELECT' });
@@ -247,6 +247,32 @@ app.post('/api/insertarcontacto', async (req, res) => {
         });        
         res.status(200).json({
           "mensaje": "se registró contacto"
+      });
+  }catch(error){
+      console.error('Error al insertar contactos en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar contacto.' });
+  }  
+});
+
+app.post('/api/insertardireccion', async (req, res) => {  
+  try{   
+      const {POSICION, IDDIRECCION, IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, IDNOMEN, VALORDIREC} = req.body;  
+      console.log(req.body);          
+      const query = `INSERT INTO DIRECCION (POSICION, IDDIRECCION,IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, IDNOMEN, VALORDIREC) VALUES (:POSICION, :IDDIRECCION, :IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :IDNOMEN, :VALORDIREC);`;
+      await db.sequelize.query(query, {
+          replacements: {            
+            POSICION,
+            IDDIRECCION,
+            IDTIPOPERSONA,
+            IDTIPODOC,
+            NDOCUMENTO,
+            IDNOMEN,
+            VALORDIREC
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });        
+        res.status(200).json({
+          "mensaje": "se registró DIRECCION"
       });
   }catch(error){
       console.error('Error al insertar contactos en la base de datos: ' + error);
