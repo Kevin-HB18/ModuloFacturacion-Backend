@@ -171,74 +171,92 @@ app.get('/api/obtenertipocomplemento', async (req, res) => {
       res.status(500).json({ error: 'Error en la consulta SELECT' });
   }
 });
-/*-------------------------------------------------------------------------------------------------------*/
 
-
-app.get('/api/obtenerDatos', async (req, res) => {
-    try {
-        const query = 'SELECT TIPODOC.DESCTIPODOC,NDOCUMENTO,NOMBRE,APELLIDO,DIRECCION,CORREO,CELULAR FROM PERSONA,TIPODOC WHERE TIPODOC.IDTIPODOC=PERSONA.IDTIPODOC;'; // Reemplaza 'nombre_de_la_tabla' con el nombre de la tabla en tu base de datos.
-        const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
-        res.json(result);
-    } catch (error) {
-        console.error(`Error en la consulta SELECT: ${error}`);
-        res.status(500).json({ error: 'Error en la consulta SELECT' });
-    }
+app.get('/api/obtenerregistroscontacto', async (req, res) => {
+  try {
+      const query = 'SELECT COUNT(CONSECCONTACTO) NUMCONTACT FROM CONTACTO;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result[0].NUMCONTACT);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
 });
+/*-------------------------------------------------------------------------------------------------------*/
+/*---------------------------------INSERCIONESREGISTRO------------------------------------------------------*/
+app.post('/api/verificarRegistro', async (req, res) => {
+  try {
+    const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO } = req.body;     
+    const query = `SELECT COUNT(*) COUNT FROM persona WHERE IDTIPOPERSONA = :IDTIPOPERSONA AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO ;`;
+    const result = await db.sequelize.query(query, {
+      replacements: {
+        IDTIPOPERSONA,
+        IDTIPODOC,
+        NDOCUMENTO,
+      },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
 
-app.get('/api/obtenerTipo', async (req, res) => {
-    try {
-        const query = 'SELECT * FROM TIPODOC;'; // Reemplaza 'nombre_de_la_tabla' con el nombre de la tabla en tu base de datos.
-        const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
-        res.json(result);
-    } catch (error) {
-        console.error(`Error en la consulta SELECT: ${error}`);
-        res.status(500).json({ error: 'Error en la consulta SELECT' });
-    }
+    // Si count es mayor que 0, significa que ya existe una combinación en la base de datos      
+    const exists = result[0].COUNT > 0;  
+    res.json({ exists });
+  } catch (error) {
+    console.error('Error al verificar el registro:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
 app.post('/api/insertarPersona', async (req, res) => {
-    try{   
-        const {IDTIPODOC, NDOCUMENTO, NOMBRE, APELLIDO, DIRECCION, CORREO, CELULAR} = req.body;               
-        const query = `INSERT INTO persona (IDTIPODOC, NDOCUMENTO, NOMBRE, APELLIDO, DIRECCION, CORREO, CELULAR) VALUES (:IDTIPODOC, :NDOCUMENTO, :NOMBRE, :APELLIDO, :DIRECCION, :CORREO, :CELULAR)`;
-        await db.sequelize.query(query, {
-            replacements: {
-              IDTIPODOC,
-              NDOCUMENTO,
-              NOMBRE,
-              APELLIDO,
-              DIRECCION,
-              CORREO,
-              CELULAR,
-            },
-            type: db.sequelize.QueryTypes.INSERT,
-          });        
-    }catch(error){
-        console.error('Error al insertar datos en la base de datos: ' + error);
-        res.status(500).json({ error: 'No se pudo registrar la persona.' });
-    }  
-  });
+  try{   
+      const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, NOMBRE, APELLIDO} = req.body;               
+      const query = `INSERT INTO persona (IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, NOMBRE, APELLIDO) VALUES (:IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :NOMBRE, :APELLIDO);`;
+      await db.sequelize.query(query, {
+          replacements: {
+            IDTIPOPERSONA,
+            IDTIPODOC,
+            NDOCUMENTO,
+            NOMBRE,
+            APELLIDO            
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });      
+        res.status(200).json({
+          "mensaje": "se registró persona"
+      });  
+  }catch(error){
+      console.error('Error al insertar persona en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar la persona.' });
+  }  
+});
 
-  app.post('/api/verificarRegistro', async (req, res) => {
-    try {
-      const { IDTIPODOC, NDOCUMENTO } = req.body;     
-      const query = `SELECT COUNT(*) AS COUNT FROM persona WHERE IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO ;`;
-      const result = await db.sequelize.query(query, {
-        replacements: {
-          IDTIPODOC,
-          NDOCUMENTO,
-        },
-        type: db.sequelize.QueryTypes.SELECT,
+app.post('/api/insertarcontacto', async (req, res) => {  
+  try{   
+      const {IDTIPOCONTACTO, DESCTIPOCONTACTO,IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, DESCCONTACTO} = req.body;  
+      console.log(req.body);          
+      const query = `INSERT INTO CONTACTO (CONSECCONTACTO,IDTIPOCONTACTO, DESCTIPOCONTACTO,IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, DESCCONTACTO) VALUES (SECUENCIA_CONTACTO.nextval,:IDTIPOCONTACTO, :DESCTIPOCONTACTO,:IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :DESCCONTACTO);`;
+      await db.sequelize.query(query, {
+          replacements: {            
+            IDTIPOCONTACTO,
+            DESCTIPOCONTACTO,
+            IDTIPOPERSONA,
+            IDTIPODOC,
+            NDOCUMENTO,
+            DESCCONTACTO                        
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });        
+        res.status(200).json({
+          "mensaje": "se registró contacto"
       });
-  
-      // Si count es mayor que 0, significa que ya existe una combinación en la base de datos      
-      const exists = result[0].COUNT > 0;  
-      res.json({ exists });
-    } catch (error) {
-      console.error('Error al verificar el registro:', error);
-      res.status(500).json({ error: 'Error en el servidor' });
-    }
-  });
-  
+  }catch(error){
+      console.error('Error al insertar contactos en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar contacto.' });
+  }  
+});
+
+
+/*-------------------------------------------------------------------------------------------------------*/
+ 
 
 /*db.sequelize
 .sync({force:true})
