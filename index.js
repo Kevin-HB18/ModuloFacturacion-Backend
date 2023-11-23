@@ -283,7 +283,19 @@ app.post('/api/insertardireccion', async (req, res) => {
 
 /*-------------------------------------------------------------------------------------------------------*/
  /*------------------------------------Factura busquedas y registros--------------------------------------------------------*/
- app.post('/api/buscarpersona', async (req, res) => {
+ app.get('/api/obtenercatproducto', async (req, res) => {
+  try {
+      const query = 'SELECT idCatProducto, desCatProducto FROM CatProducto;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+
+app.post('/api/buscarpersona', async (req, res) => {
   try{   
       const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO} = req.body;             
       const query = `SELECT NOMBRE, APELLIDO FROM PERSONA WHERE IDTIPOPERSONA = :IDTIPOPERSONA AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO;`;
@@ -298,6 +310,54 @@ app.post('/api/insertardireccion', async (req, res) => {
         
         if(result.length===0){
           res.json({NOMBRE: '', APELLIDO:''})
+        }else
+          res.json(result);
+  }catch(error){
+      console.error('Error al BUSCAR persona en la base de datos: ' + error);
+      res.data.status(500).json('Wronggg en buscar persona');
+  }  
+});
+
+app.post('/api/buscarproducto', async (req, res) => {
+  try{   
+      const {REFPRODUCTO, IDCATPRODUCTO} = req.body;             
+      const query = `SELECT P.nomProducto, H.valor FROM Producto P, HistoricoPrecio H
+        WHERE P.refProducto = H.refProducto AND P.idCatProducto = H.idCatProducto
+        AND H.refProducto = :REFPRODUCTO AND H.idCatProducto = :IDCATPRODUCTO AND H.FechaFin is null;`;
+      const result = await db.sequelize.query(query, {
+          replacements: {
+            REFPRODUCTO,
+            IDCATPRODUCTO                            
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        });      
+        
+        if(result.length===0){
+          res.json({REFPRODUCTO: '', IDCATPRODUCTO:''})
+        }else
+          res.json(result);
+  }catch(error){
+      console.error('Error al BUSCAR persona en la base de datos: ' + error);
+      res.data.status(500).json('Wronggg en buscar persona');
+  }  
+});
+
+app.post('/api/buscarcantidad', async (req, res) => {
+  try{   
+      const {REFPRODUCTO, IDCATPRODUCTO} = req.body;             
+      const query = `SELECT D.cantidad CANTIDAD FROM Producto P, DetalleFactura D
+        WHERE P.refProducto = D.refProducto AND P.idCatProducto = D.idCatProducto
+        AND D.refProducto = :REFPRODUCTO AND D.idCatProducto = :IDCATPRODUCTO; `;
+      const result = await db.sequelize.query(query, {
+          replacements: {
+            REFPRODUCTO,
+            IDCATPRODUCTO                            
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        });      
+        
+        if(result.length===0){
+          res.json({REFPRODUCTO: '', IDCATPRODUCTO:''})
         }else
           res.json(result);
   }catch(error){
