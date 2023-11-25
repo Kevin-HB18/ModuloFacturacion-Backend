@@ -174,9 +174,13 @@ app.get('/api/obtenertipocomplemento', async (req, res) => {
 
 app.get('/api/obtenerregistrosdireccion', async (req, res) => {
   try {
-      const query = 'SELECT DISTINCT idDireccion NUMDIRECC FROM DIRECCION;';
+      const query = `SELECT COUNT(NUMDIRECC) TOTALREGISTROS
+                      FROM (
+                      SELECT DISTINCT idDireccion NUMDIRECC
+                      FROM DIRECCION)
+                      ResultadosUnicos;`;
       const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
-      res.json(result[0].NUMDIRECC);
+      res.json(result[0].TOTALREGISTROS);
   } catch (error) {
       console.error(`Error en la consulta SELECT: ${error}`);
       res.status(500).json({ error: 'Error en la consulta SELECT' });
@@ -337,17 +341,17 @@ app.post('/api/buscarproducto', async (req, res) => {
         }else
           res.json(result);
   }catch(error){
-      console.error('Error al BUSCAR persona en la base de datos: ' + error);
-      res.data.status(500).json('Wronggg en buscar persona');
+      console.error('Error al BUSCAR PRODUCTO en la base de datos: ' + error);
+      res.data.status(500).json('Wronggg en buscar PRODUCTO');
   }  
 });
 
 app.post('/api/buscarcantidad', async (req, res) => {
   try{   
       const {REFPRODUCTO, IDCATPRODUCTO} = req.body;             
-      const query = `SELECT D.cantidad CANTIDAD FROM Producto P, DetalleFactura D
-        WHERE P.refProducto = D.refProducto AND P.idCatProducto = D.idCatProducto
-        AND D.refProducto = :REFPRODUCTO AND D.idCatProducto = :IDCATPRODUCTO; `;
+      const query = `SELECT NVL(I.EXISTENCIA,0) CANTIDAD FROM Producto P, INVENTARIO I
+                      WHERE P.refProducto = I.refProducto AND P.idCatProducto = I.idCatProducto
+                      AND P.refProducto = :REFPRODUCTO AND P.idCatProducto = :IDCATPRODUCTO AND I.consecInven in (select Max(TO_NUMBER(consecInven)) from Inventario where refProducto = :REFPRODUCTO AND idCatProducto = :IDCATPRODUCTO); `;
       const result = await db.sequelize.query(query, {
           replacements: {
             REFPRODUCTO,
@@ -357,14 +361,155 @@ app.post('/api/buscarcantidad', async (req, res) => {
         });      
         
         if(result.length===0){
-          res.json({REFPRODUCTO: '', IDCATPRODUCTO:''})
+          res.json({"CANTIDAD": 0})
         }else
-          res.json(result);
+          res.json(result[0]);
+  }catch(error){
+      console.error('Error al BUSCAR CANTIDAD en la base de datos: ' + error);
+      res.data.status(500).json('Wronggg en buscar CANTIDAD');
+  }  
+});
+
+/*-------------------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------Guardar Factura, detalle e inventario-----------------------------------------------*/
+
+app.post('/api/insertarfactura', async (req, res) => {  
+  try{   
+      const {IDTIPOFAC, IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, IDTIPOFAC_SUP, NFACTURA_SUP,CODEMPLEADO, TOTALFACTURA} = req.body;  
+      console.log(req.body);          
+      const query = `INSERT INTO FACTURA VALUES (TO_CHAR(SECUENCIA_FACTURA.nextval), :IDTIPOFAC, :IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :IDTIPOFAC_SUP, :NFACTURA_SUP, :CODEMPLEADO, CURRENT_TIMESTAMP, :TOTALFACTURA);`;
+      await db.sequelize.query(query, {
+          replacements: {            
+            IDTIPOFAC, 
+            IDTIPOPERSONA, 
+            IDTIPODOC, 
+            NDOCUMENTO, 
+            IDTIPOFAC_SUP,
+            NFACTURA_SUP,
+            CODEMPLEADO,              
+            TOTALFACTURA
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });        
+        res.status(200).json({
+          "mensaje": "se registró FACTURA"
+      });
+  }catch(error){
+      console.error('Error al insertar contactos en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar contacto.' });
+  }  
+});
+
+app.post('/api/insertardetallefactura', async (req, res) => {  
+  try{   
+      const {NFACTURA,IDTIPOFAC, ITEM, IDCATPRODUCTO, REFPRODUCTO, CANTIDAD, PRECIO} = req.body;  
+      console.log(req.body);          
+      const query = `INSERT INTO DETALLEFACTURA VALUES (:NFACTURA, :IDTIPOFAC, :ITEM, :IDCATPRODUCTO, :REFPRODUCTO, :CANTIDAD, :PRECIO);`;
+      await db.sequelize.query(query, {
+          replacements: {             
+            NFACTURA,        
+            IDTIPOFAC, 
+            ITEM,
+            IDCATPRODUCTO,
+            REFPRODUCTO,             
+            CANTIDAD, 
+            PRECIO
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });        
+        res.status(200).json({
+          "mensaje": "se registró Detalle FACTURA"
+      });
+  }catch(error){
+      console.error('Error al insertar contactos en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar contacto.' });
+  }  
+});
+
+app.post('/api/insertarinventario', async (req, res) => {  
+  try{   
+      const {IDTIPOFAC, NFACTURA, ITEM,IDCATPRODUCTO, REFPRODUCTO, CONSECINVEN_SUP, SALEN, ENTRAN, EXISTENCIA} = req.body;  
+      console.log(req.body);          
+      const query = `INSERT INTO INVENTARIO VALUES (SECUENCIA_INVENTARIO.NEXTVAL, :IDTIPOFAC, :NFACTURA, :ITEM, :IDCATPRODUCTO, :REFPRODUCTO, :CONSECINVEN_SUP, CURRENT_TIMESTAMP, :SALEN, :ENTRAN, :EXISTENCIA);`;
+      await db.sequelize.query(query, {
+          replacements: {            
+            IDTIPOFAC, 
+            NFACTURA,
+            ITEM,
+            IDCATPRODUCTO, 
+            REFPRODUCTO,
+            CONSECINVEN_SUP, 
+            SALEN, 
+            ENTRAN, 
+            EXISTENCIA
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        });        
+        res.status(200).json({
+          "mensaje": "se registró inventario"
+      });
+  }catch(error){
+      console.error('Error al insertar contactos en la base de datos: ' + error);
+      res.status(500).json({ error: 'No se pudo registrar contacto.' });
+  }  
+});
+
+app.get('/api/obtenercantidadfacturas', async (req, res) => {
+  try {
+      const query = 'SELECT max(TO_NUMBER(NFACTURA))+1 CANTFACT FROM FACTURA;';
+      const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
+      res.json(result[0].CANTFACT);
+  } catch (error) {
+      console.error(`Error en la consulta SELECT: ${error}`);
+      res.status(500).json({ error: 'Error en la consulta SELECT' });
+  }
+});
+
+app.post('/api/buscarexistenciaproducto', async (req, res) => {
+  try{   
+      const {IDCATPRODUCTO, REFPRODUCTO} = req.body;             
+      const query = `SELECT EXISTENCIA FROM INVENTARIO WHERE IDCATPRODUCTO = :IDCATPRODUCTO AND REFPRODUCTO = :REFPRODUCTO
+                  and consecInven in (select Max(TO_NUMBER(consecInven)) from Inventario where refProducto = :REFPRODUCTO AND idCatProducto = :IDCATPRODUCTO);`;
+      const result = await db.sequelize.query(query, {
+          replacements: {
+            IDCATPRODUCTO,
+            REFPRODUCTO                            
+          },
+          type: db.sequelize.QueryTypes.SELECT,
+        });              
+      
+        if(result.length===0){
+          res.json({"EXISTENCIA": 0})
+        }else
+          res.json(result[0]);
   }catch(error){
       console.error('Error al BUSCAR persona en la base de datos: ' + error);
       res.data.status(500).json('Wronggg en buscar persona');
   }  
 });
+
+app.post('/api/verificarFactura', async (req, res) => {
+  try {
+    const {NFACTURA, IDTIPOFAC} = req.body;     
+    const query = `SELECT COUNT(NFACTURA) COUNT FROM FACTURA WHERE NFACTURA = :NFACTURA AND IDTIPOFAC = :IDTIPOFAC;`;
+    const result = await db.sequelize.query(query, {
+      replacements: {
+        NFACTURA,
+        IDTIPOFAC
+      },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+
+    // Si count es mayor que 0, significa que ya existe una combinación en la base de datos      
+    const exists = result[0].COUNT > 0;  
+    res.json({ exists });
+  } catch (error) {
+    console.error('Error al verificar el registro:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+
 
 /*-------------------------------------------------------------------------------------------------------*/
 
