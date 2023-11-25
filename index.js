@@ -490,12 +490,14 @@ app.post('/api/buscarexistenciaproducto', async (req, res) => {
 
 app.post('/api/verificarFactura', async (req, res) => {
   try {
-    const {NFACTURA, IDTIPOFAC} = req.body;     
-    const query = `SELECT COUNT(NFACTURA) COUNT FROM FACTURA WHERE NFACTURA = :NFACTURA AND IDTIPOFAC = :IDTIPOFAC;`;
+    const {NFACTURA, IDTIPOFAC, IDTIPODOC, NDOCUMENTO } = req.body;     
+    const query = `SELECT COUNT(NFACTURA) COUNT FROM FACTURA WHERE NFACTURA = :NFACTURA AND IDTIPOFAC = :IDTIPOFAC AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO;`;
     const result = await db.sequelize.query(query, {
       replacements: {
         NFACTURA,
-        IDTIPOFAC
+        IDTIPOFAC,
+        IDTIPODOC,
+        NDOCUMENTO
       },
       type: db.sequelize.QueryTypes.SELECT,
     });
