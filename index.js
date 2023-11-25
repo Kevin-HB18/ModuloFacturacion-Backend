@@ -1,14 +1,14 @@
-const port = process.env.PORT || 3001,
-express = require('express'),
+const port = process.env.PORT || 3001, //puerto donde se va a ejecutar backend
+express = require('express'), //framework para backend
 app = express();
-db = require('./models');
-const cors = require("cors");
+db = require('./models'); //busca los modelos de la bd
+const cors = require("cors"); //para configurar rutas
 
 app.listen(port, ()=>{
     console.log(`Servidor corriendo en puerto ${port}...`)
 });
 
-app.use(express.json());
+app.use(express.json()); //procesa las solicitudes entrantes con datos en formato JSON
 
 app.use((req, res, next) => {
     const allowedOrigins = ['http://localhost:3000'];
@@ -16,19 +16,18 @@ app.use((req, res, next) => {
     if (allowedOrigins.includes(origin)) {
         res.setHeader('Access-Control-Allow-Origin', origin);
     }
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');//habilitar acceso a get, push, put, delete
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
 
 const corsOptions = {
     origin: ['localhost:3000']
-};
+};//configura el cors para localhost 3000
 
 app.use(cors(corsOptions));
 
-//app.use(express.json());
-
+/*--------------------------Obtener Cargos----------------------*/
 app.get('/api/obtenercargos', async (req, res) => {
     try {
         const query = 'SELECT codCargo, nomCargo FROM Cargo;';
@@ -40,6 +39,7 @@ app.get('/api/obtenercargos', async (req, res) => {
     }
 });
 
+/*-------------------------Verificar que el empleado exista para loguearse-----------------------*/
 app.post('/api/verificarlogin', async (req, res) => {
     try {
       const { CODEMPLEADO, CODCARGO } = req.body;     
@@ -61,6 +61,7 @@ app.post('/api/verificarlogin', async (req, res) => {
     }
   });
 
+/*----------------------------------Obtiene los tipos de documento------------------------------*/
 app.get('/api/obtenertipodoc', async (req, res) => {
     try {
         const query = 'SELECT idTipoDoc, descTipoDoc FROM TipoDoc;';
@@ -72,6 +73,7 @@ app.get('/api/obtenertipodoc', async (req, res) => {
     }
 });
 
+/*----------------------------------Obtiene los tipos de contacto------------------------------*/
 app.get('/api/obtenertipocontact', async (req, res) => {
   try {
       const query = 'SELECT idTipoContacto, descTipoContacto FROM TipoContacto;';
@@ -83,6 +85,7 @@ app.get('/api/obtenertipocontact', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de persona------------------------------*/
 app.get('/api/obtenertipopersona', async (req, res) => {
   try {
       const query = 'SELECT idTipoPersona, DescTipoPersona FROM TipoPersona;';
@@ -93,8 +96,11 @@ app.get('/api/obtenertipopersona', async (req, res) => {
       res.status(500).json({ error: 'Error en la consulta SELECT' });
   }
 });
+
 /*-------------------------------------------------------------------------------------------------------*/
 /*------------------------------------------------NOMENCLATURAS------------------------------------------------*/
+
+/*----------------------------------Obtiene los tipos de via------------------------------*/
 app.get('/api/obtenertipovia', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=1 ;';
@@ -106,6 +112,7 @@ app.get('/api/obtenertipovia', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de cuadrante------------------------------*/
 app.get('/api/obtenertipocuadrante', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=6 ;';
@@ -117,6 +124,7 @@ app.get('/api/obtenertipocuadrante', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de barrio------------------------------*/
 app.get('/api/obtenertipobarrio', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=13 ;';
@@ -128,6 +136,7 @@ app.get('/api/obtenertipobarrio', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de urbanización------------------------------*/
 app.get('/api/obtenertipourbanizacion', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=17 ;';
@@ -139,6 +148,7 @@ app.get('/api/obtenertipourbanizacion', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de manzana------------------------------*/
 app.get('/api/obtenertipomanzana', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=15 ;';
@@ -150,6 +160,7 @@ app.get('/api/obtenertipomanzana', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de predio------------------------------*/
 app.get('/api/obtenertipopredio', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=19 ;';
@@ -161,6 +172,7 @@ app.get('/api/obtenertipopredio', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene los tipos de complemento------------------------------*/
 app.get('/api/obtenertipocomplemento', async (req, res) => {
   try {
       const query = 'SELECT idNomen, DescNomen FROM Nomenclatura where Posicion=21 ;';
@@ -172,6 +184,7 @@ app.get('/api/obtenertipocomplemento', async (req, res) => {
   }
 });
 
+/*----------------------------------Obtiene la cantidad de registros en direccion------------------------------*/
 app.get('/api/obtenerregistrosdireccion', async (req, res) => {
   try {
       const query = `SELECT COUNT(NUMDIRECC) TOTALREGISTROS
@@ -188,6 +201,8 @@ app.get('/api/obtenerregistrosdireccion', async (req, res) => {
 });
 /*-------------------------------------------------------------------------------------------------------*/
 /*---------------------------------INSERCIONESREGISTRO------------------------------------------------------*/
+
+/*----------------------------------Verifica si la persona ya fue registrada------------------------------*/
 app.post('/api/verificarRegistro', async (req, res) => {
   try {
     const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO } = req.body;     
@@ -210,6 +225,7 @@ app.post('/api/verificarRegistro', async (req, res) => {
   }
 });
 
+/*----------------------------------Inserta la persona en la tabla PERSONA------------------------------*/
 app.post('/api/insertarPersona', async (req, res) => {
   try{   
       const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, NOMBRE, APELLIDO} = req.body;               
@@ -233,6 +249,7 @@ app.post('/api/insertarPersona', async (req, res) => {
   }  
 });
 
+/*----------------------------------Inserta contacto en la tabla CONTACTO------------------------------*/
 app.post('/api/insertarcontacto', async (req, res) => {  
   try{   
       const {IDTIPOCONTACTO, DESCTIPOCONTACTO,IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, DESCCONTACTO} = req.body;  
@@ -258,6 +275,7 @@ app.post('/api/insertarcontacto', async (req, res) => {
   }  
 });
 
+/*----------------------------------inserta dirección en la tabla DIRECCION------------------------------*/
 app.post('/api/insertardireccion', async (req, res) => {  
   try{   
       const {POSICION, IDDIRECCION, IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, IDNOMEN, VALORDIREC} = req.body;  
@@ -287,6 +305,8 @@ app.post('/api/insertardireccion', async (req, res) => {
 
 /*-------------------------------------------------------------------------------------------------------*/
  /*------------------------------------Factura busquedas y registros--------------------------------------------------------*/
+
+ /*----------------------------------Obtiene la categoria de los productos------------------------------*/
  app.get('/api/obtenercatproducto', async (req, res) => {
   try {
       const query = 'SELECT idCatProducto, desCatProducto FROM CatProducto;';
@@ -298,7 +318,7 @@ app.post('/api/insertardireccion', async (req, res) => {
   }
 });
 
-
+/*----------------------------------Busca la persona para hacer factura------------------------------*/
 app.post('/api/buscarpersona', async (req, res) => {
   try{   
       const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO} = req.body;             
@@ -322,6 +342,7 @@ app.post('/api/buscarpersona', async (req, res) => {
   }  
 });
 
+/*----------------------------------Busca el producto------------------------------*/
 app.post('/api/buscarproducto', async (req, res) => {
   try{   
       const {REFPRODUCTO, IDCATPRODUCTO} = req.body;             
@@ -346,6 +367,7 @@ app.post('/api/buscarproducto', async (req, res) => {
   }  
 });
 
+/*----------------------------------Busca si existe tal cantidad de producto------------------------------*/
 app.post('/api/buscarcantidad', async (req, res) => {
   try{   
       const {REFPRODUCTO, IDCATPRODUCTO} = req.body;             
@@ -373,11 +395,12 @@ app.post('/api/buscarcantidad', async (req, res) => {
 /*-------------------------------------------------------------------------------------------------------*/
 /*-----------------------------------------------Guardar Factura, detalle e inventario-----------------------------------------------*/
 
+/*----------------------------------Inserta factura en la tabla FACTURA------------------------------*/
 app.post('/api/insertarfactura', async (req, res) => {  
   try{   
       const {IDTIPOFAC, IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO, IDTIPOFAC_SUP, NFACTURA_SUP,CODEMPLEADO, TOTALFACTURA} = req.body;  
       console.log(req.body);          
-      const query = `INSERT INTO FACTURA VALUES (TO_CHAR(SECUENCIA_FACTURA.nextval), :IDTIPOFAC, :IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :IDTIPOFAC_SUP, :NFACTURA_SUP, :CODEMPLEADO, CURRENT_TIMESTAMP, :TOTALFACTURA);`;
+      const query = `INSERT INTO FACTURA VALUES (TO_CHAR(SECUENCIA_FACTURA.nextval), :IDTIPOFAC, :IDTIPOPERSONA, :IDTIPODOC, :NDOCUMENTO, :IDTIPOFAC_SUP, :NFACTURA_SUP, :CODEMPLEADO, :TOTALFACTURA, CURRENT_TIMESTAMP);`;
       await db.sequelize.query(query, {
           replacements: {            
             IDTIPOFAC, 
@@ -400,6 +423,7 @@ app.post('/api/insertarfactura', async (req, res) => {
   }  
 });
 
+/*----------------------------------Inserta en la tabla DETALLEFACTURA------------------------------*/
 app.post('/api/insertardetallefactura', async (req, res) => {  
   try{   
       const {NFACTURA,IDTIPOFAC, ITEM, IDCATPRODUCTO, REFPRODUCTO, CANTIDAD, PRECIO} = req.body;  
@@ -426,11 +450,12 @@ app.post('/api/insertardetallefactura', async (req, res) => {
   }  
 });
 
+/*----------------------------------Inserta en la tabla INVENTARIO------------------------------*/
 app.post('/api/insertarinventario', async (req, res) => {  
   try{   
       const {IDTIPOFAC, NFACTURA, ITEM,IDCATPRODUCTO, REFPRODUCTO, CONSECINVEN_SUP, SALEN, ENTRAN, EXISTENCIA} = req.body;  
       console.log(req.body);          
-      const query = `INSERT INTO INVENTARIO VALUES (SECUENCIA_INVENTARIO.NEXTVAL, :IDTIPOFAC, :NFACTURA, :ITEM, :IDCATPRODUCTO, :REFPRODUCTO, :CONSECINVEN_SUP, CURRENT_TIMESTAMP, :SALEN, :ENTRAN, :EXISTENCIA);`;
+      const query = `INSERT INTO INVENTARIO VALUES (SECUENCIA_INVENTARIO.NEXTVAL, :IDTIPOFAC, :NFACTURA, :ITEM, :IDCATPRODUCTO, :REFPRODUCTO, :CONSECINVEN_SUP, :SALEN, :ENTRAN, :EXISTENCIA, CURRENT_TIMESTAMP);`;
       await db.sequelize.query(query, {
           replacements: {            
             IDTIPOFAC, 
@@ -454,6 +479,7 @@ app.post('/api/insertarinventario', async (req, res) => {
   }  
 });
 
+/*----------------------------------Obtiene la cantidad de facturas------------------------------*/
 app.get('/api/obtenercantidadfacturas', async (req, res) => {
   try {
       const query = 'SELECT NVL(max(TO_NUMBER(NFACTURA))+1,1) CANTFACT FROM FACTURA;';
@@ -465,6 +491,7 @@ app.get('/api/obtenercantidadfacturas', async (req, res) => {
   }
 });
 
+/*----------------------------------Busca la existencia del producto en la tabla INVENTARIO, COLUMNA EXISTENCIA------------------------------*/
 app.post('/api/buscarexistenciaproducto', async (req, res) => {
   try{   
       const {IDCATPRODUCTO, REFPRODUCTO} = req.body;             
@@ -488,6 +515,7 @@ app.post('/api/buscarexistenciaproducto', async (req, res) => {
   }  
 });
 
+/*----------------------------------Busca si la factura ya existe------------------------------*/
 app.post('/api/verificarFactura', async (req, res) => {
   try {
     const {NFACTURA, IDTIPOFAC, IDTIPODOC, NDOCUMENTO } = req.body;     
@@ -511,12 +539,21 @@ app.post('/api/verificarFactura', async (req, res) => {
   }
 });
 
-
-
-/*-------------------------------------------------------------------------------------------------------*/
-
-/*db.sequelize
-.sync({force:true})
-.then(()=>console.log('conectado a base de datos'))
-.catch((e)=>console.log(`Error => ${e}`));*/
-
+/*----------------------------------Obtiene el nombre del empleado en la tabla EMPLEADO------------------------------*/
+app.post('/api/buscarnombreempleado', async (req, res) => {
+  try {
+    const {CODEMPLEADO} = req.body;     
+    const query = `SELECT nomEmpleado, apellEmpleado FROM EMPLEADO WHERE CODEMPLEADO = :CODEMPLEADO;`;
+    const result = await db.sequelize.query(query, {
+      replacements: {
+        CODEMPLEADO      
+      },
+      type: db.sequelize.QueryTypes.SELECT,
+    });
+   
+    res.json(result);
+  } catch (error) {
+    console.error('Error al verificar el registro:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
