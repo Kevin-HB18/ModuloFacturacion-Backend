@@ -456,7 +456,7 @@ app.post('/api/insertarinventario', async (req, res) => {
 
 app.get('/api/obtenercantidadfacturas', async (req, res) => {
   try {
-      const query = 'SELECT max(TO_NUMBER(NFACTURA))+1 CANTFACT FROM FACTURA;';
+      const query = 'SELECT NVL(max(TO_NUMBER(NFACTURA))+1,1) CANTFACT FROM FACTURA;';
       const result = await db.sequelize.query(query, { type: db.sequelize.QueryTypes.SELECT });        
       res.json(result[0].CANTFACT);
   } catch (error) {
