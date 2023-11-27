@@ -43,7 +43,7 @@ app.get('/api/obtenercargos', async (req, res) => {
 app.post('/api/verificarlogin', async (req, res) => {
     try {
       const { CODEMPLEADO, CODCARGO } = req.body;     
-      const query= `SELECT COUNT(codEmpleado) COUNT FROM emplcargo where codEmpleado = :CODEMPLEADO AND codCargo = :CODCARGO ;`
+      const query= `SELECT COUNT(codEmpleado) COUNT FROM emplcargo where codEmpleado = :CODEMPLEADO AND codCargo = :CODCARGO  AND fechafin IS NULL ;`
       const result = await db.sequelize.query(query, {
         replacements: {
           CODEMPLEADO,
@@ -322,7 +322,7 @@ app.post('/api/insertardireccion', async (req, res) => {
 app.post('/api/buscarpersona', async (req, res) => {
   try{   
       const {IDTIPOPERSONA, IDTIPODOC, NDOCUMENTO} = req.body;             
-      const query = `SELECT NOMBRE, APELLIDO FROM PERSONA WHERE IDTIPOPERSONA = :IDTIPOPERSONA AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO;`;
+      const query = `SELECT UPPER(NOMBRE) NOMBRE, UPPER(APELLIDO) APELLIDO FROM PERSONA WHERE IDTIPOPERSONA = :IDTIPOPERSONA AND IDTIPODOC = :IDTIPODOC AND NDOCUMENTO = :NDOCUMENTO;`;
       const result = await db.sequelize.query(query, {
           replacements: {
             IDTIPOPERSONA,
@@ -543,7 +543,7 @@ app.post('/api/verificarFactura', async (req, res) => {
 app.post('/api/buscarnombreempleado', async (req, res) => {
   try {
     const {CODEMPLEADO} = req.body;     
-    const query = `SELECT nomEmpleado, apellEmpleado FROM EMPLEADO WHERE CODEMPLEADO = :CODEMPLEADO;`;
+    const query = `SELECT UPPER(nomEmpleado) nomEmpleado, UPPER(apellEmpleado) apellEmpleado FROM EMPLEADO WHERE CODEMPLEADO = :CODEMPLEADO;`;
     const result = await db.sequelize.query(query, {
       replacements: {
         CODEMPLEADO      
